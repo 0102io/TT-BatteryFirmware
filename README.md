@@ -1,2 +1,3 @@
-# Initial Commit Notes
-This repository was copied from `https://github.com/0102io/testing/tree/main/tt_battery_fw_pio` in release v0.4.2.
+# TappyTap Battery Firmware
+
+This firmware runs on the microcontroller on the TappyTap Battery PCB. Full documentation for this project is in the [0102.io docs pages](http://docs.0102.io/). Specific details are not kept in this readme to avoid duplication and retain a single set of reference material.
