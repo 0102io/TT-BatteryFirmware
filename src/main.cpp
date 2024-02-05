@@ -11,8 +11,6 @@ float percentFloat = 0; // remaining battery percent, estimated by the fuel gaug
 uint8_t percentInt = 0;
 
 Adafruit_MAX17048 lipo; // I2C object for communicating with the fuel gauge
-Adafruit_I2CDevice *controller; // I2C object for communicating with the controller
-
 
 void setup() {
   // LED indicator pins, used for displaying the battery state of charge
@@ -55,39 +53,36 @@ void setup() {
 void loop() {
   sleep_cpu(); // sleep the cpu after we have acted on whatever interrupt woke us up.
 
-  // STAT pin woke us up; determine if it is the controller or charger that is connected, then tell them the battery SOC (controller) or display the charging animation (charger)
+  // STAT pin woke us up, display the charging animation
   if (statAsserted) {
     delay(10); // wait a bit and read pin to make sure it's still high, to ignore blips
     if (!digitalRead(STAT_PIN)) {
       statAsserted = false;
       return;
     }
+
     if (!percentInt) { // if there was an issue with the I2C bus, battery percent is usually still at 0%, so reset the bus and try reading again if that's the case
       resetI2CBus();
       percentFloat = lipo.cellPercent();
       delay(10);
       percentInt = (uint8_t)percentFloat;
     }
-    uint8_t err = writeToController(REG_CONTROLLER_PERCENT, percentInt);
-    if (err == 2) { // the other device didn't acknowledge, so it's probably the charger that pulled STAT high
-      while (digitalRead(STAT_PIN)) { // continue to display the charging animation until the charger is disconnected or charging is complete (STAT will be pulled low in either case)
-        displayChargingStatus(percentFloat);
-      }
+    
+    while (digitalRead(STAT_PIN)) { // continue to display the charging animation until the charger is disconnected or charging is complete (STAT will be pulled low in either case)
+      displayChargingStatus(percentFloat);
     }
-    else if (err != 0) displayError(err); // since this is development code, blink out any other errors that are unexpected
     statAsserted = false;
   }
 
-  // SOC change alert woke us up; try to tell the controller
+  // SOC change alert woke us up; read the updated SOC from the fuel gauge
   else if (socChanged) {
+    delay(1);
+    percentFloat = lipo.cellPercent();
+    delay(1);
+    percentInt = (uint8_t)percentFloat;
     socChanged = false;
     lipo.clearAlertFlag(MAX1704X_ALERTFLAG_SOC_CHANGE); // clear the alert flag in the status register
     setConfig(); // this clears the alert bit in the config register (needed to pull the alert pin high again)
-    percentFloat = lipo.cellPercent();
-    delay(10);
-    percentInt = (uint8_t)percentFloat;
-    uint8_t err = writeToController(REG_CONTROLLER_PERCENT, percentInt);
-    if (err != 2) displayError(err); // if error = 2 (address NACK) then the controller isn't connected; don't do anything
   }
 
   // button press woke us up; display the battery SOC on the indicator LEDs
