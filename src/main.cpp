@@ -9,6 +9,7 @@ volatile bool statAsserted = false; // "STAT" pin is exerted (pulled high) by co
 volatile bool socChanged = false; // State of charge alert flag, set when we receive an SOC alert from the fuel gauge
 float percentFloat = 0; // remaining battery percent, estimated by the fuel gauge
 uint8_t percentInt = 0;
+bool showSOC = true;
 
 Adafruit_MAX17048 lipo; // I2C object for communicating with the fuel gauge
 Adafruit_I2CDevice *controller; // I2C object for communicating with the controller
@@ -46,6 +47,10 @@ void setup() {
   delay(10);
   setConfig();
 
+  delay(10);
+  percentFloat = lipo.cellPercent();
+  displayLevel(percentFloat);
+
   // disable ADC to save power; see https://github.com/SpenceKonde/megaTinyCore/blob/c7afbb3161086edb54112005df15e4a1db84bf16/megaavr/extras/PowerSave.md
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -75,6 +80,7 @@ void loop() {
       }
     }
     else if (err != 0) displayError(err); // since this is development code, blink out any other errors that are unexpected
+    if (showSOC) displayLevel(percentFloat);
     statAsserted = false;
   }
 
@@ -88,11 +94,14 @@ void loop() {
     percentInt = (uint8_t)percentFloat;
     uint8_t err = writeToController(REG_CONTROLLER_PERCENT, percentInt);
     if (err != 2) displayError(err); // if error = 2 (address NACK) then the controller isn't connected; don't do anything
+    if (showSOC) displayLevel(percentFloat);
   }
 
   // button press woke us up; display the battery SOC on the indicator LEDs
   else if (buttonPressed) {
-    displayLevel(percentFloat);
+    showSOC = !showSOC;
+    if (showSOC) displayLevel(percentFloat);
+    else turnOffLeds();
     buttonPressed = false;
   }
 }

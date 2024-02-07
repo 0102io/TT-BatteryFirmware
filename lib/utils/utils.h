@@ -37,6 +37,7 @@
 
 void blink(uint8_t led, uint8_t times, int onDuration, int offDuration);
 void displayLevel(float percent);
+void turnOffLeds();
 void displayChargingStatus(float percent);
 void displayError(uint8_t e);
 
