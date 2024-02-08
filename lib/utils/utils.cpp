@@ -50,9 +50,9 @@ void displayChargingStatus(float percent) {
     for(int i = 0; i < ledPosition; i++) {
         digitalWrite(leds[i], LOW);
     }
-    digitalWrite(leds[ledPosition - 1], LOW);
+    digitalWrite(leds[ledPosition], LOW);
     delay(500);
-    digitalWrite(leds[ledPosition - 1], HIGH);
+    digitalWrite(leds[ledPosition], HIGH);
     delay(500);
 
     for(int i = 0; i < ledPosition; i++) {

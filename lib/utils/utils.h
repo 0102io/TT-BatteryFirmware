@@ -1,7 +1,7 @@
 #ifndef UTILS_h
 #define UTILS_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 // message codes sent to controller
 #define BATTERY_PERCENT 1 
