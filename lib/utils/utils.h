@@ -1,7 +1,7 @@
 #ifndef UTILS_h
 #define UTILS_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 // I2C address of I2C devices
 #define ADDR_MAX17048 0x36
@@ -30,6 +30,7 @@
 
 void blink(uint8_t led, uint8_t times, int onDuration, int offDuration);
 void displayLevel(float percent);
+void turnOffLeds();
 void displayChargingStatus(float percent);
 void displayError(uint8_t e);
 

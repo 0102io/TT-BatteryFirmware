@@ -13,6 +13,7 @@ uint8_t percentInt = 0;
 Adafruit_MAX17048 lipo; // I2C object for communicating with the fuel gauge
 
 void setup() {
+  delay(100); // let fuel gauge have some time to start up before we reset it
   // LED indicator pins, used for displaying the battery state of charge
   pinMode(LED1, OUTPUT);
   digitalWrite(LED1, HIGH);
@@ -43,6 +44,9 @@ void setup() {
   if (!lipo.begin(&Wire)) resetI2CBus(); // note: the adafruit begin() function sends a reset command which makes the IC fully re-estimate battery level
   delay(10);
   setConfig();
+
+  delay(10);
+  percentFloat = lipo.cellPercent();
 
   // disable ADC to save power; see https://github.com/SpenceKonde/megaTinyCore/blob/c7afbb3161086edb54112005df15e4a1db84bf16/megaavr/extras/PowerSave.md
   ADC0.CTRLA &= ~ADC_ENABLE_bm;
@@ -88,6 +92,8 @@ void loop() {
   // button press woke us up; display the battery SOC on the indicator LEDs
   else if (buttonPressed) {
     displayLevel(percentFloat);
+    delay(3000);
+    turnOffLeds();
     buttonPressed = false;
   }
 }

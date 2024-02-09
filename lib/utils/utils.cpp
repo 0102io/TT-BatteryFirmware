@@ -21,31 +21,23 @@ void blink(uint8_t led, uint8_t times, int onDuration, int offDuration) {
 // light up a number of LEDs corresponding to the value of the passed parameter
 void displayLevel(float percent) {
     // display cell level
-    if (percent > 20.0) {
-        digitalWrite(LED1, LOW);
-        if (percent > 40.0) {
+    digitalWrite(LED1, LOW);
+    if (percent > 25) {
         digitalWrite(LED2, LOW);
-        if (percent > 60.0) {
+        if (percent > 50) {
             digitalWrite(LED3, LOW);
-            if (percent > 80.0) {
-            digitalWrite(LED4, LOW);
+            if (percent > 75) {
+                digitalWrite(LED4, LOW);
             }
         }
-        }
-        delay(5000);
-        digitalWrite(LED1, HIGH);
-        digitalWrite(LED2, HIGH);
-        digitalWrite(LED3, HIGH);
-        digitalWrite(LED4, HIGH);
     }
-    else {
-        for(int i = 0; i < 5; i++) {
-        digitalWrite(LED1, LOW);
-        delay(500);
-        digitalWrite(LED1, HIGH);
-        delay(500);
-        }
-    }
+}
+
+void turnOffLeds() {
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, HIGH);
+    digitalWrite(LED3, HIGH);
+    digitalWrite(LED4, HIGH);
 }
 
 // animation for displaying where we are in the charging cycle
@@ -58,16 +50,10 @@ void displayChargingStatus(float percent) {
     for(int i = 0; i < ledPosition; i++) {
         digitalWrite(leds[i], LOW);
     }
-
-    if (ledPosition == 4) delay(4000); // if the battery is almost full, turn on all LEDs on for 4s
-    else { // otherwise, blink the highest LED to show that we're charging
-        for(int i = 0; i < 5; i++) {
-            digitalWrite(leds[ledPosition - 1], LOW);
-            delay(500);
-            digitalWrite(leds[ledPosition - 1], HIGH);
-            delay(500);
-        }
-    }
+    digitalWrite(leds[ledPosition], LOW);
+    delay(500);
+    digitalWrite(leds[ledPosition], HIGH);
+    delay(500);
 
     for(int i = 0; i < ledPosition; i++) {
         digitalWrite(leds[i], HIGH);
