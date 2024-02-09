@@ -27,6 +27,7 @@
 #define ERROR_INDICATOR_LED LED4
 #define SDA_PIN SDA
 #define SCL_PIN SCL
+#define QSTRT_PIN PIN_PB4
 
 void blink(uint8_t led, uint8_t times, int onDuration, int offDuration);
 void displayLevel(float percent);

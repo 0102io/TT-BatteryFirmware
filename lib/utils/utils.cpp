@@ -43,9 +43,9 @@ void turnOffLeds() {
 // animation for displaying where we are in the charging cycle
 void displayChargingStatus(float percent) { 
     uint8_t ledPosition = 3;
-    if (percent < 75) ledPosition = 2;
+    if (percent < 25) ledPosition = 0;
     else if (percent < 50) ledPosition = 1;
-    else if (percent < 25) ledPosition = 0;
+    else if (percent < 75) ledPosition = 2;
 
     for(int i = 0; i < ledPosition; i++) {
         digitalWrite(leds[i], LOW);
