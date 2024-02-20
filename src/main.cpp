@@ -57,11 +57,24 @@ void setup() {
   delay(10);
   setConfig();
 
-  delay(10);
+  delay(200); // SOC is available after ~200ms
   percent = lipo.cellPercent();
   if ( percent == 0) { // if there was an issue with the I2C bus, battery percent is usually still at 0%, so reset the bus and try reading again if that's the case
     resetI2CBus();
     percent = lipo.cellPercent();
+  }
+
+  // if the battery is completely drained and put on the charger, we won't get the STAT pin interrupt, so check the STAT pin here
+  while (digitalRead(STAT_PIN)) {
+    if (socChanged) {
+      socChanged = false;
+      lipo.clearAlertFlag(MAX1704X_ALERTFLAG_SOC_CHANGE); // clear the alert flag in the status register
+      setConfig(); // this clears the alert bit in the config register (needed to pull the alert pin high again)
+      delay(10);
+      percentFloat = lipo.cellPercent();
+      delay(10);
+    }
+    displayChargingStatus(percentFloat);
   }
 
   // disable ADC to save power; see https://github.com/SpenceKonde/megaTinyCore/blob/c7afbb3161086edb54112005df15e4a1db84bf16/megaavr/extras/PowerSave.md
@@ -85,6 +98,21 @@ void loop() {
       if (socChanged) socGetUpdate();
       displayChargingStatus(percent);
     }
+    uint8_t err = writeToController(REG_CONTROLLER_PERCENT, percentInt);
+    if (err == 2) { // the other device didn't acknowledge, so it's probably the charger that pulled STAT high
+      while (digitalRead(STAT_PIN)) { // continue to display the charging animation until the charger is disconnected or charging is complete (STAT will be pulled low in either case)
+        if (socChanged) {
+          socChanged = false;
+          lipo.clearAlertFlag(MAX1704X_ALERTFLAG_SOC_CHANGE); // clear the alert flag in the status register
+          setConfig(); // this clears the alert bit in the config register (needed to pull the alert pin high again)
+          delay(10);
+          percentFloat = lipo.cellPercent();
+          delay(10);
+        }
+        displayChargingStatus(percentFloat);
+      }
+    }
+    else if (err != 0) displayError(err); // since this is development code, blink out any other errors that are unexpected
     statAsserted = false;
   }
 
