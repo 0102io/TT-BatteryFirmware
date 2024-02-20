@@ -43,9 +43,9 @@ void turnOffLeds() {
 // animation for displaying where we are in the charging cycle
 void displayChargingStatus(float percent) { 
     uint8_t ledPosition = 3;
-    if (percent < 75) ledPosition = 2;
+    if (percent < 25) ledPosition = 0;
     else if (percent < 50) ledPosition = 1;
-    else if (percent < 25) ledPosition = 0;
+    else if (percent < 75) ledPosition = 2;
 
     for(int i = 0; i < ledPosition; i++) {
         digitalWrite(leds[i], LOW);
@@ -87,16 +87,6 @@ uint8_t setConfig() {
     uint8_t err = Wire.endTransmission();
     delay(10);
     displayError(err);
-    return err;
-}
-
-// sends an I2C message to the controller
-uint8_t writeToController(uint8_t _register, uint8_t data) {
-    Wire.beginTransmission(ADDR_CONTROLLER);
-    Wire.write(_register);
-    Wire.write(data);
-    uint8_t err = Wire.endTransmission();
-    delay(10); // doesn't seem to work without this delay. why?!?!
     return err;
 }
 
